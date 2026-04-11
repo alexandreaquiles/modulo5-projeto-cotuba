@@ -1,5 +1,8 @@
 package br.com.unipds;
 
+import jakarta.enterprise.inject.se.SeContainer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -16,13 +19,13 @@ public class Main {
 
         boolean modoVerboso = true;
 
-        try {
-            var leitorOpcoesCLI = new LeitorOpcoesCLI();
+        try (SeContainer container = SeContainerInitializer.newInstance().initialize()) {
+            var leitorOpcoesCLI = container.select(LeitorOpcoesCLI.class).get();
             ParametrosCotuba parametrosCotuba = leitorOpcoesCLI.ler(args);
 
             modoVerboso = parametrosCotuba.isModoVerboso();
 
-            var cotubaService = new CotubaService();
+            var cotubaService = container.select(CotubaService.class).get();
             cotubaService.executar(parametrosCotuba);
 
             System.out.println("Arquivo gerado com sucesso: " + parametrosCotuba.getArquivoDeSaida());

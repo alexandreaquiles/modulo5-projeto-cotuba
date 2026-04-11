@@ -1,5 +1,6 @@
 package br.com.unipds;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -8,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
+@ApplicationScoped
 public class LeitorOpcoesCLI {
 
     public ParametrosCotuba ler(String[] args) {
