@@ -7,42 +7,67 @@ import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;
 import nl.siegmann.epublib.service.MediatypeService;
 
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 public class GeradorEPUB {
 
-    public void gerarEPUB(List<String> htmls, Path arquivoSaida) {
+    public void gerarEPUB(Ebook ebook) {
+        List<Capitulo> capitulos = ebook.getCapitulos();
+        Path arquivoSaida = ebook.getArquivoSaida();
 
         try {
             var epub = new Book();
 
-            //TODO: definir título e autor para o livro
-            epub.getMetadata().addTitle("Livro");
-            epub.getMetadata().addAuthor(new Author("Autor"));
+            epub.getMetadata().addTitle(ebook.getTitulo());
+            epub.getMetadata().addAuthor(new Author(ebook.getAutor()));
 
             boolean[] ehPrimeiroCapitulo = {true};
 
-            htmls.forEach(html -> {
-                // TODO: usar título do capítulo
-                String epubHtml = """
-                                          <html xmlns="http://www.w3.org/1999/xhtml">
-                                            <head>
-                                              <title>Capítulo</title>
-                                            </head>
-                                            <body>
-                                              %s
-                                            </body>
-                                          </html>
-                                        """.formatted(html);
-                var chapter = new Resource(epubHtml.getBytes(), MediatypeService.XHTML);
-                epub.addSection("Capítulo", chapter);
+            capitulos.forEach(capitulo -> {
+                String html = capitulo.getHtml();
+                String tituloCapitulo = capitulo.getTitulo();
 
-                if (ehPrimeiroCapitulo[0]) {
-                    epub.getGuide().addReference(new GuideReference(chapter, "text", "Start Reading"));
-                    ehPrimeiroCapitulo[0] = false;
+                try {
+                    StringWriter sw = new StringWriter();
+                    XMLStreamWriter writer = XMLOutputFactory.newInstance()
+                            .createXMLStreamWriter(sw);
+
+                    writer.writeStartElement("html");
+                    writer.writeDefaultNamespace("http://www.w3.org/1999/xhtml");
+
+                    writer.writeStartElement("head");
+                    writer.writeStartElement("title");
+                    writer.writeCharacters(ebook.getTitulo());
+                    writer.writeEndElement();
+                    writer.writeEndElement();
+
+                    writer.writeStartElement("body");
+                    writer.writeCharacters("");
+                    writer.flush();
+                    sw.write(html);
+
+                    writer.writeEndElement(); // body
+                    writer.writeEndElement(); // html
+
+                    writer.close();
+
+                    var chapter = new Resource(sw.toString().getBytes(), MediatypeService.XHTML);
+                    epub.addSection(tituloCapitulo, chapter);
+
+                    if (ehPrimeiroCapitulo[0]) {
+                        epub.getGuide().addReference(new GuideReference(chapter, "text", "Start Reading"));
+                        ehPrimeiroCapitulo[0] = false;
+                    }
+
+                } catch (XMLStreamException ex) {
+                    throw new IllegalStateException("Erro ao criar capitulo do epub: " + capitulo.getTitulo(), ex);
                 }
             });
 

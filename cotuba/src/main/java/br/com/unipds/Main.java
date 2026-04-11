@@ -18,31 +18,14 @@ public class Main {
 
         try {
             var leitorOpcoesCLI = new LeitorOpcoesCLI();
-            leitorOpcoesCLI.ler(args);
+            ParametrosCotuba parametrosCotuba = leitorOpcoesCLI.ler(args);
 
-            Path diretorioDosMD = leitorOpcoesCLI.getDiretorioDosMD();
-            String formato = leitorOpcoesCLI.getFormato();
-            Path arquivoDeSaida = leitorOpcoesCLI.getArquivoDeSaida();
-            modoVerboso = leitorOpcoesCLI.isModoVerboso();
+            modoVerboso = parametrosCotuba.isModoVerboso();
 
-            var renderizadorMarkdown = new RenderizadorMarkdown();
-            List<String> htmls = renderizadorMarkdown.renderizar(diretorioDosMD);
+            var cotubaService = new CotubaService();
+            cotubaService.executar(parametrosCotuba);
 
-            if ("pdf".equals(formato)) {
-
-                var geradorPDF = new GeradorPDF();
-                geradorPDF.gerarPDF(htmls, arquivoDeSaida);
-
-            } else if ("epub".equals(formato)) {
-
-                var geradorEPUB = new GeradorEPUB();
-                geradorEPUB.gerarEPUB(htmls, arquivoDeSaida);
-
-            } else {
-                throw new IllegalArgumentException("Formato do ebook inválido: " + formato);
-            }
-
-            System.out.println("Arquivo gerado com sucesso: " + arquivoDeSaida);
+            System.out.println("Arquivo gerado com sucesso: " + parametrosCotuba.getArquivoDeSaida());
             return 0;
 
         } catch (Exception ex) {
