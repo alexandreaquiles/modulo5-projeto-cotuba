@@ -11,13 +11,13 @@ import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.properties.AreaBreakType;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-@ApplicationScoped @Named("geradorPDF")
+@FormatoEbookQualifier(FormatoEbook.PDF)
+@ApplicationScoped
 public class GeradorPDF implements GeradorEbook {
 
     public void gerar(Ebook ebook) {
