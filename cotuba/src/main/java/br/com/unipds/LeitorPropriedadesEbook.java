@@ -2,6 +2,8 @@ package br.com.unipds;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -17,8 +19,8 @@ public class LeitorPropriedadesEbook {
         }
 
         Properties properties = new Properties();
-        try (InputStream in = Files.newInputStream(arquivoProperties)) {
-            properties.load(in);
+        try (Reader reader = Files.newBufferedReader(arquivoProperties, StandardCharsets.UTF_8)) {
+            properties.load(reader);
         } catch (IOException ex) {
             throw new IllegalStateException("Erro ao ler arquivo: " + arquivoProperties, ex);
         }
