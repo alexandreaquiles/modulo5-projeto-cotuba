@@ -27,22 +27,23 @@ public class CotubaService {
 
     public void executar(ParametrosCotuba parametrosCotuba) {
 
-        Path diretorioDosMD = parametrosCotuba.getDiretorioDosMD();
+        Path diretorioDosMD = parametrosCotuba.diretorioDosMD();
 
-        List<Capitulo> capitulos = repositorioMarkdowns.buscar(diretorioDosMD);
+        List<Markdown> markdowns = repositorioMarkdowns.buscar(diretorioDosMD);
 
-        renderizadorMarkdown.renderizar(capitulos);
+        List<Capitulo> capitulos = renderizadorMarkdown.renderizar(markdowns);
 
-        var ebook = new Ebook();
+        var propriedadesEbook = leitorPropriedadesEbook.ler(diretorioDosMD);
 
-        leitorPropriedadesEbook.ler(diretorioDosMD, ebook);
+        var ebook = EbookBuilder.builder()
+                .capitulos(capitulos)
+                .formato(parametrosCotuba.formato())
+                .arquivoSaida(parametrosCotuba.arquivoDeSaida())
+                .titulo(propriedadesEbook.titulo())
+                .autor(propriedadesEbook.autor())
+                .build();
 
-        ebook.setCapitulos(capitulos);
-        ebook.setFormato(parametrosCotuba.getFormato());
-        ebook.setArquivoSaida(parametrosCotuba.getArquivoDeSaida());
-
-        FormatoEbook formato = ebook.getFormato();
-        GeradorEbook geradorEbook = geradoresEbook.select(FormatoEbookFilter.of(formato)).get();
+        GeradorEbook geradorEbook = geradoresEbook.select(FormatoEbookFilter.of(ebook.formato())).get();
 
         geradorEbook.gerar(ebook);
 

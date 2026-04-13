@@ -16,47 +16,49 @@ public class RenderizadorMarkdownCommonmark implements RenderizadorMarkdown {
 
 
     @Override
-    public void renderizar(List<Capitulo> capitulos) {
+    public List<Capitulo> renderizar(List<Markdown> markdowns) {
 
-           capitulos.forEach(capitulo -> {
+        return markdowns.stream().map(markdown -> {
 
-                Parser parser = Parser.builder().build();
-                Node document = null;
-                try {
+            var capituloBuilder = CapituloBuilder.builder();
+            capituloBuilder.markdown(markdown);
 
-                    String markdown = capitulo.getMarkdown();
+            Parser parser = Parser.builder().build();
+            Node document = null;
+            try {
 
-                    document = parser.parse(markdown);
-                    document.accept(new AbstractVisitor() {
-                        @Override
-                        public void visit(Heading heading) {
-                            if (heading.getLevel() == 1) {
-                                // capítulo
-                                String tituloDoCapitulo = ((Text) heading.getFirstChild()).getLiteral();
-                                capitulo.setTitulo(tituloDoCapitulo);
-                            } else if (heading.getLevel() == 2) {
-                                // seção
-                            } else if (heading.getLevel() == 3) {
-                                // título
-                            }
+                document = parser.parse(markdown.conteudo());
+                document.accept(new AbstractVisitor() {
+                    @Override
+                    public void visit(Heading heading) {
+                        if (heading.getLevel() == 1) {
+                            // capítulo
+                            String tituloDoCapitulo = ((Text) heading.getFirstChild()).getLiteral();
+                            capituloBuilder.titulo(tituloDoCapitulo);
+                        } else if (heading.getLevel() == 2) {
+                            // seção
+                        } else if (heading.getLevel() == 3) {
+                            // título
                         }
+                    }
 
-                    });
-                } catch (Exception ex) {
-                    throw new IllegalStateException("Erro ao fazer parse do arquivo " + capitulo.getArquivoMardown(), ex);
-                }
+                });
+            } catch (Exception ex) {
+                throw new IllegalStateException("Erro ao fazer parse do arquivo " + markdown.arquivo(), ex);
+            }
 
-                try {
-                    HtmlRenderer renderer = HtmlRenderer.builder().build();
-                    String html = renderer.render(document);
+            try {
+                HtmlRenderer renderer = HtmlRenderer.builder().build();
+                String html = renderer.render(document);
 
-                    capitulo.setHtml(html);
+                capituloBuilder.html(html);
 
-                } catch (Exception ex) {
-                    throw new IllegalStateException("Erro ao renderizar para HTML o arquivo " + capitulo.getArquivoMardown(), ex);
-                }
-            });
+            } catch (Exception ex) {
+                throw new IllegalStateException("Erro ao renderizar para HTML o arquivo " + markdown.arquivo(), ex);
+            }
 
+            return capituloBuilder.build();
+        }).toList();
 
     }
 }
