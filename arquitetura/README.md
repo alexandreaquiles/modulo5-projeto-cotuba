@@ -16,9 +16,6 @@ C4Context
     Person(leitor, "Leitor", "")
 
     System(cotubify, "Cotubify", "Gerenciar venda de ebooks, geracao e publicacao de ebooks em PDF e EPUB")
-    System_Ext(git, "Provedor de Git Externo", "Armazenar o codigo fonte (Markdown e imagens) dos livros")
-    System_Ext(pagamento, "Gateway de Pagamentos", "Processar pagamentos da venda (Pix e Cartao de Credito)")
-    System_Ext(email, "Sistema de Email Externo", "Enviar recibos, notificacoes, avisos para os usuarios")
 
     Rel(autor, cotubify, "Configura conta, publica livros, verifica painel de vendas, solicita saque")
     Rel(leitor, cotubify, "Navega na loja, faz compras e baixa ebooks")
@@ -26,6 +23,10 @@ C4Context
     Rel(cotubify, git, "Clona repositorio para obter o codigo fonte do livro")
     Rel(cotubify, pagamento, "Envia e recebe cobrancas financeiras")
     Rel(cotubify, email, "Envia emails")
+
+    System_Ext(git, "Provedor de Git Externo", "Armazenar o codigo fonte (Markdown e imagens) dos livros")
+    System_Ext(pagamento, "Gateway de Pagamentos", "Processar pagamentos da venda (Pix e Cartao de Credito)")
+    System_Ext(email, "Sistema de Email Externo", "Enviar recibos, notificacoes, avisos para os usuarios")
 ```
 
 ## Diagrama de Containers (C4 Model)
@@ -36,10 +37,6 @@ C4Container
 
     Person(autor, "Autor", "")
     Person(leitor, "Leitor", "")
-
-    System_Ext(git, "Provedor de Git Externo", "Armazenar o codigo fonte (Markdown e imagens) dos livros")
-    System_Ext(pagamento, "Gateway de Pagamentos", "Stripe - Processar pagamentos da venda (Pix e Cartao de Credito)")
-    System_Ext(email, "Sistema de Email Externo", "AWS SES - Enviar recibos, notificacoes, avisos para os usuarios")
 
     System_Boundary(cotubify, "Cotubify", "Gerenciar venda de ebooks, geracao e publicacao de ebooks em PDF e EPUB") {
         Container(webapp, "Frontend", "", "UI para os autores e leitores")
@@ -66,4 +63,8 @@ C4Container
 
     Rel(gerador, git, "Clona o repositorio do livro", "SSH")
     Rel(gerador, storage, "Faz upload de ebooks PDF/EPUB gerados", "SSH")
+
+    System_Ext(git, "Provedor de Git Externo", "Armazenar o codigo fonte (Markdown e imagens) dos livros")
+    System_Ext(pagamento, "Gateway de Pagamentos", "Stripe - Processar pagamentos da venda (Pix e Cartao de Credito)")
+    System_Ext(email, "Sistema de Email Externo", "AWS SES - Enviar recibos, notificacoes, avisos para os usuarios")
 ```
