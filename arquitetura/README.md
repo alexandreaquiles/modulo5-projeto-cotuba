@@ -42,9 +42,13 @@ C4Container
         Container(webapp, "Frontend", "", "UI para os autores e leitores")
         Container(api, "API Principal", "Java, Spring Boot", "Regras de negocio, catalogo de vendas, seguranca, financeiro")
     
-        Container(gerador, "Servico Gerador de Ebooks", "Java, Spring Boot", "Servico que eh o Motor da transformacao de livros Markdown para PDF e EPUB")
+        Container(gerador, "Servico Gerador de Ebooks (Worker)", "Java, Spring Boot", "Servico que eh o Motor da transformacao de livros Markdown para PDF e EPUB")
     
         ContainerDb(db, "BD Relacional", "PostgreSQL (AWS RDS)", "Armazenar dados financeiros, dos usuarios, catalogo de livros")
+
+        ContainerQueue(broker, "Message Broker", "AWS SQS", "Fila de mensagens assíncronas para desacoplar tarefas pesadas.")
+
+        ContainerDb(cache, "Cache em Memória", "Redis (AWS Elasticache)", "Armazena o catálogo de livros mais vendidos (Top 100) para leitura ultrarrápida.")
 
         ContainerDb(storage, "Armazenamento de Arquivos", "Object Storage (AWS S3)", "Capas dos livros, PDF, EPUB (binarios) ")
     }
@@ -55,16 +59,24 @@ C4Container
     Rel(webapp, api, "", "HTTPS/JSON")
     Rel(webapp, storage, "Faz download de ebooks e imagens", "HTTPS")
 
+    Rel(api, cache, "Lê/Escreve catálogo em cache (Cache-Aside)", "TCP")
     Rel(api, db, "Transactional, queries", "JDBC")
     Rel(api, pagamento, "Processa pagamentos", "HTTPS/JSON")
     Rel(api, email, "Envia dados pra enviar avisos, notificacoes e recibos", "HTTPS/JSON")
     Rel(api, storage, "Salva capa dos livros e gera URLs de download", "S3 API")
-    Rel(api, gerador, "Solicita geracao dos ebooks pesados", "HTTPS/JSON")
+    Rel(api, broker, "Solicita geracao dos ebooks pesados", "TCP???")
 
     Rel(gerador, git, "Clona o repositorio do livro", "SSH")
     Rel(gerador, storage, "Faz upload de ebooks PDF/EPUB gerados", "SSH")
+
+    Rel(broker, gerador, "GeracaoEbookCommand vai ser consumido pelo Gerador", "TCP???")
 
     System_Ext(git, "Provedor de Git Externo", "Armazenar o codigo fonte (Markdown e imagens) dos livros")
     System_Ext(pagamento, "Gateway de Pagamentos", "Stripe - Processar pagamentos da venda (Pix e Cartao de Credito)")
     System_Ext(email, "Sistema de Email Externo", "AWS SES - Enviar recibos, notificacoes, avisos para os usuarios")
 ```
+
+## Decisoes Arquiteturais (ADRs)
+
+- [ADR 001: Geracao de ebooks via Mensageria Assincrona](adr/adr-001-geracao-ebooks-assincrona.md)
+- [ADR 002: Introdução de Cache em Memória para o Catálogo de E-books](adr/adr-002-cache-catalogo.md)
