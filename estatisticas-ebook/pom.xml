@@ -42,7 +42,9 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>br.com.unipds:cotuba</exclude>
+                                    <exclude>br.com.unipds:cotuba-domain</exclude>
+                                    <exclude>br.com.unipds:cotuba-plugin</exclude>
+                                    <exclude>io.soabase.record-builder:*</exclude>
                                     <exclude>org.jboss.weld.se:*</exclude>
                                     <exclude>org.jmolecules:*</exclude>
                                 </excludes>

@@ -56,9 +56,16 @@ public class RenderizadorMarkdownCommonmark implements RenderizadorMarkdown {
                 HtmlRenderer renderer = HtmlRenderer.builder().build();
                 String html = renderer.render(document);
 
+                System.out.println("Renderizou HTML: ");
+
                 for (CotubaPluginAposRenderizacao plugin : ServiceLoader.load(CotubaPluginAposRenderizacao.class)) {
 
+                    System.out.println("Vai chamar plugin \n\n");
+
                     String htmlProcessado = plugin.aposRenderizacao(html);
+
+                    System.out.println("Chamou plugin com : " + htmlProcessado);
+
 
                     if (htmlProcessado != null && !htmlProcessado.isBlank()) {
                         html = htmlProcessado;

@@ -6,6 +6,7 @@ public class PluginTemaCSS implements CotubaPluginAposRenderizacao {
 
     @Override
     public String aposRenderizacao(String html) {
+        System.out.println("Invocou o plguin de tema com o html: " + html);
 
         return """
                 <style>
